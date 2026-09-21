@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#FFF3F7">
+<title>For Ordho 🎂</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎂</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shrikhand&family=Figtree:wght@400;500;700;800&family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --blush:#FFF3F7;
+    --paper:#FFFFFF;
+    --rani:#E0157A;      /* rani pink */
+    --marigold:#FFB21E;  /* marigold / Kolkata taxi */
+    --mint:#8FDCC2;
+    --sky:#9CC9FF;
+    --ink:#2A1B4F;       /* deep indigo for text */
+    --ink-soft:#5A4C7A;
+    --display:'Shrikhand', 'Georgia', serif;
+    --body:'Figtree', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --hand:'Caveat', 'Comic Sans MS', cursive;
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  *,*::before,*::after{box-sizing:inherit}
+  html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%}
+  body{
+    margin:0;background:var(--blush);color:var(--ink);
+    font-family:var(--body);font-size:17px;line-height:1.6;
+    -webkit-tap-highlight-color:transparent;overflow-x:hidden;
+  }
+  img{max-width:100%;display:block}
+  h1,h2,h3{font-family:var(--display);font-weight:400;line-height:1.15;margin:0}
+  p{margin:0 0 1em}
+  button{font:inherit;cursor:pointer}
+  :focus-visible{outline:3px solid var(--rani);outline-offset:3px;border-radius:6px}
+
+  /* ---------- LOCK SCREEN ---------- */
+  #lock{
+    position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;
+    padding:24px;padding-top:calc(24px + env(safe-area-inset-top,0px));
+    background:
+      radial-gradient(circle at 12% 18%, var(--marigold) 0 56px, transparent 57px),
+      radial-gradient(circle at 88% 82%, var(--mint) 0 80px, transparent 81px),
+      radial-gradient(circle at 92% 10%, var(--sky) 0 34px, transparent 35px),
+      var(--blush);
+    overflow:hidden;
+  }
+  #lock .dots{position:absolute;inset:0;pointer-events:none;
+    background-image:radial-gradient(var(--rani) 1.6px, transparent 1.7px);background-size:22px 22px;opacity:.12}
+  .ticket{
+    position:relative;width:100%;max-width:380px;background:var(--paper);
+    border:3px solid var(--ink);border-radius:22px;padding:30px 24px 26px;
+    box-shadow:8px 8px 0 var(--ink);text-align:center;
+    animation:wobble-in .8s cubic-bezier(.2,1.6,.4,1) both;
+  }
+  .ticket::before,.ticket::after{ /* ticket notches */
+    content:"";position:absolute;top:50%;width:22px;height:22px;border-radius:50%;
+    background:var(--blush);border:3px solid var(--ink);transform:translateY(-50%)}
+  .ticket::before{left:-14px;clip-path:inset(0 0 0 50%)}
+  .ticket::after{right:-14px;clip-path:inset(0 50% 0 0)}
+  .lock-emoji{font-size:54px;line-height:1;display:inline-block;animation:bob 2.4s ease-in-out infinite}
+  .ticket h1{font-size:clamp(30px,9vw,40px);color:var(--rani);margin:10px 0 6px;transform:rotate(-2deg)}
+  .ticket .sub{color:var(--ink-soft);font-size:15px;margin-bottom:20px}
+  .pw-row{display:flex;flex-direction:column;gap:12px}
+  #pw{
+    width:100%;font:600 18px var(--body);padding:14px 16px;border:3px solid var(--ink);
+    border-radius:14px;background:#FFFBEF;color:var(--ink);text-align:center;letter-spacing:.04em;
+  }
+  #pw:focus{outline:none;border-color:var(--rani);box-shadow:0 0 0 4px rgba(224,21,122,.18)}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    background:var(--rani);color:#fff;border:3px solid var(--ink);border-radius:14px;
+    padding:13px 22px;font-weight:800;font-size:17px;box-shadow:4px 4px 0 var(--ink);
+    transition:transform .12s, box-shadow .12s;
+  }
+  .btn:active{transform:translate(3px,3px);box-shadow:1px 1px 0 var(--ink)}
+  .btn.alt{background:var(--marigold);color:var(--ink)}
+  .link-btn{background:none;border:0;color:var(--ink-soft);text-decoration:underline;text-underline-offset:3px;font-size:15px;margin-top:14px;padding:6px}
+  #hint{display:none;margin-top:10px;background:#FFF1C9;border:2px dashed var(--marigold);border-radius:12px;padding:10px 12px;font-family:var(--hand);font-size:22px;line-height:1.25}
+  #hint.show{display:block;animation:pop .35s ease}
+  #pw-msg{min-height:24px;margin-top:12px;font-weight:700;color:var(--rani);font-size:15px}
+  .shake{animation:shake .45s}
+  #lock.leaving{animation:lock-out .7s ease forwards}
+
+  /* ---------- APP SHELL ---------- */
+  #app{display:none}
+  #app.on{display:block}
+  .page{display:none;max-width:680px;margin:0 auto;padding:28px 20px 130px}
+  .page.active{display:block;animation:page-in .45s ease both}
+  .page-title{font-size:clamp(32px,9vw,48px);color:var(--rani);margin:8px 0 6px}
+  .page-lede{color:var(--ink-soft);font-size:17px;margin-bottom:26px;max-width:36em}
+  .section-h{font-size:clamp(24px,6.5vw,30px);margin:40px 0 14px;color:var(--ink)}
+  .placeholder-text{background:#FFFBEF;border:2px dashed #E9C98A;border-radius:14px;padding:14px 16px;color:var(--ink-soft);font-style:italic}
+
+  /* bottom nav */
+  #nav{
+    position:fixed;left:0;right:0;bottom:0;z-index:20;
+    padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));
+    background:rgba(255,243,247,.94);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+    border-top:3px solid var(--ink);
+  }
+  #nav .inner{max-width:680px;margin:0 auto;display:flex;align-items:center;gap:10px}
+  #nav .btn{padding:10px 16px;font-size:15px;box-shadow:3px 3px 0 var(--ink)}
+  #nav .btn[disabled]{opacity:.35;pointer-events:none}
+  #nav .where{flex:1;text-align:center;font-size:13px;color:var(--ink-soft);line-height:1.3}
+  #nav .where b{display:block;color:var(--ink);font-size:14px}
+  .pips{display:flex;justify-content:center;gap:5px;margin-top:5px}
+  .pips i{width:7px;height:7px;border-radius:50%;background:#E4D6E9;display:block}
+  .pips i.on{background:var(--rani);width:18px;border-radius:4px}
+
+  /* ---------- PHOTOS ---------- */
+  .ph{position:relative;margin:0;background:var(--paper);border:3px solid var(--ink);border-radius:10px;padding:8px 8px 0;box-shadow:5px 5px 0 var(--ink);cursor:zoom-in}
+  .ph img{width:100%;aspect-ratio:var(--ar,4/5);object-fit:cover;border-radius:4px}
+  .ph figcaption{font-family:var(--hand);font-size:22px;line-height:1.2;padding:8px 4px 10px;text-align:center}
+  .ph .empty{
+    aspect-ratio:var(--ar,4/5);border-radius:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+    text-align:center;padding:12px;color:var(--ink-soft);font-size:13px;line-height:1.35;
+    background:#FFE3EE radial-gradient(#fff 2px, transparent 2.2px) 0 0/16px 16px;
+  }
+  .ph .empty span{font-size:34px}
+  .ph .empty code{background:#fff;border-radius:6px;padding:2px 6px;font-size:12px;word-break:break-all}
+  .ph.no-img{cursor:default}
+  .tilt-l{transform:rotate(-2.5deg)} .tilt-r{transform:rotate(2deg)}
+
+  /* ---------- PAGE 1: BIRTHDAY ---------- */
+  .hb-hero{text-align:center;padding:10px 0 20px}
+  .hb-cake{font-size:64px;line-height:1;display:inline-block}
+  .hb-title{font-size:clamp(46px,15vw,84px);color:var(--rani);line-height:1;margin:10px 0 4px;text-shadow:4px 4px 0 var(--marigold)}
+  .hb-title .l{display:inline-block;opacity:0;transform:translateY(40px) rotate(-10deg)}
+  .go .hb-title .l{animation:letter .6s cubic-bezier(.2,1.5,.4,1) forwards;animation-delay:calc(var(--i) * 55ms)}
+  .hb-my{font-family:var(--hand);font-size:30px;margin:6px 0 16px;opacity:0}
+  .go .hb-my{animation:fade 0.6s 1s forwards}
+  .names{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;padding:0 4px}
+  .name{
+    font-family:var(--display);font-size:clamp(20px,5.8vw,26px);padding:6px 16px 8px;border:3px solid var(--ink);border-radius:999px;
+    background:var(--paper);box-shadow:3px 3px 0 var(--ink);opacity:0;transform:scale(.3) rotate(var(--r,0deg));
+  }
+  .name:nth-child(4n+1){background:#FFE0EE}.name:nth-child(4n+2){background:#FFF0C2}
+  .name:nth-child(4n+3){background:#D9F5EA}.name:nth-child(4n+4){background:#E1EEFF}
+  .name.last{background:var(--rani);color:#fff;font-size:clamp(24px,7vw,32px)}
+  .go .name{animation:stamp .5s cubic-bezier(.2,1.8,.4,1) forwards;animation-delay:calc(1.5s + var(--i) * 380ms)}
+  .hb-scroll{margin-top:28px;opacity:0;font-size:15px;color:var(--ink-soft)}
+  .go .hb-scroll{animation:fade .6s 5.2s forwards}
+  .story{background:var(--paper);border:3px solid var(--ink);border-radius:20px;padding:22px 20px;box-shadow:6px 6px 0 var(--mint);margin-top:36px}
+  .story h2{font-size:clamp(26px,7vw,34px);color:var(--ink);margin-bottom:12px}
+  .kid-pics{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:22px 0 6px}
+  .kid-pics .ph{padding:5px 5px 0;box-shadow:3px 3px 0 var(--ink)}
+  .kid-pics .ph figcaption{font-size:17px;padding:5px 2px 6px}
+  .kid-pics .ph .empty{font-size:11px}.kid-pics .ph .empty span{font-size:24px}
+  @media (max-width:420px){.kid-pics .ph .empty code{display:none}}
+
+  /* ---------- PAGE 2: JOURNEY ---------- */
+  .road{position:relative;padding-left:34px;margin-top:10px}
+  .road::before{content:"";position:absolute;left:12px;top:6px;bottom:6px;width:4px;border-radius:4px;
+    background:repeating-linear-gradient(var(--ink) 0 14px, transparent 14px 24px)}
+  .stop{position:relative;margin-bottom:36px}
+  .stop .pin{position:absolute;left:-34px;top:0;width:28px;height:28px;border-radius:50%;border:3px solid var(--ink);
+    background:var(--marigold);display:grid;place-items:center;font-size:14px}
+  .stop .when{font-weight:800;color:var(--rani);font-size:14px}
+  .stop h3{font-size:clamp(22px,6vw,27px);margin:2px 0 8px}
+  .stop .ph{margin-top:12px;max-width:320px}
+  .ach-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .ach{background:var(--paper);border:3px solid var(--ink);border-radius:16px;padding:10px;box-shadow:4px 4px 0 var(--marigold)}
+  .ach .ph{box-shadow:none;border-width:2px;padding:4px 4px 0}
+  .ach h4{margin:10px 2px 4px;font-size:16px;line-height:1.3}
+  .ach p{font-size:14px;color:var(--ink-soft);margin:0 2px 4px;line-height:1.45}
+  @media (max-width:380px){.ach-grid{grid-template-columns:1fr}}
+
+  /* ---------- PAGE 3: SPECIAL ---------- */
+  .traits{display:grid;gap:12px}
+  .trait{display:flex;gap:14px;align-items:flex-start;background:var(--paper);border:3px solid var(--ink);border-radius:16px;padding:14px 16px}
+  .trait .e{font-size:30px;line-height:1;flex-shrink:0;margin-top:2px}
+  .trait b{display:block;font-size:17px}
+  .trait span{font-size:15px;color:var(--ink-soft)}
+  .quirks{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .quirk{background:#FFF0C2;border:3px solid var(--ink);border-radius:16px;padding:14px;font-size:14px;line-height:1.45}
+  .quirk:nth-child(3n+2){background:#FFE0EE;transform:rotate(1deg)}
+  .quirk:nth-child(3n){background:#D9F5EA;transform:rotate(-1deg)}
+  .quirk .e{font-size:28px;display:block}
+  .quirk b{display:block;font-size:16px;margin:4px 0 4px}
+  @media (max-width:380px){.quirks{grid-template-columns:1fr}}
+  .serious{margin-top:40px;background:var(--rani);color:#fff;border:3px solid var(--ink);border-radius:22px;padding:24px 22px;box-shadow:6px 6px 0 var(--ink)}
+  .serious h2{font-size:clamp(26px,7vw,34px);margin-bottom:12px}
+  .serious p{font-size:17px}
+  .hot{margin-top:30px;text-align:center}
+  .hot p{font-family:var(--hand);font-size:28px;line-height:1.25;margin-bottom:16px}
+
+  /* ---------- PAGE 4: GALLERY ---------- */
+  .gallery{columns:2;column-gap:14px}
+  .gallery .ph{break-inside:avoid;margin-bottom:16px;padding:5px 5px 0;box-shadow:4px 4px 0 var(--ink)}
+  .gallery .ph:nth-child(odd){transform:rotate(-1.2deg)}
+  .gallery .ph:nth-child(even){transform:rotate(1.2deg)}
+  .gallery .ph figcaption{font-size:19px}
+
+  /* ---------- PAGE 5: DATES ---------- */
+  .date{background:var(--paper);border:3px solid var(--ink);border-radius:20px;padding:14px;margin-bottom:26px;box-shadow:6px 6px 0 var(--sky)}
+  .date:nth-child(even){box-shadow:6px 6px 0 var(--marigold)}
+  .date .ph{box-shadow:none;border-width:2px}
+  .date h3{font-size:clamp(22px,6vw,26px);margin:14px 4px 4px}
+  .date .meta{font-weight:700;color:var(--rani);font-size:14px;margin:0 4px 8px}
+  .date p{margin:0 4px 6px;font-size:16px}
+
+  /* ---------- PAGE 6: US TIMELINE ---------- */
+  .us{position:relative}
+  .us::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:3px;background:var(--rani);transform:translateX(-50%);opacity:.5}
+  .moment{position:relative;width:calc(50% - 20px);margin-bottom:30px}
+  .moment:nth-child(odd){margin-right:auto}
+  .moment:nth-child(even){margin-left:auto}
+  .moment::after{content:"💗";position:absolute;top:6px;font-size:18px}
+  .moment:nth-child(odd)::after{right:-31px}
+  .moment:nth-child(even)::after{left:-31px}
+  .moment .ph{padding:4px 4px 0;box-shadow:3px 3px 0 var(--ink)}
+  .moment .when{font-weight:800;color:var(--rani);font-size:13px;margin-top:10px}
+  .moment h3{font-family:var(--body);font-weight:800;font-size:16px;margin:2px 0 4px;line-height:1.3}
+  .moment p{font-size:14px;line-height:1.45;color:var(--ink-soft);margin:0}
+  @media (max-width:440px){
+    .us::before{left:10px}
+    .moment{width:auto;margin-left:34px !important;margin-right:0 !important}
+    .moment::after{left:-34px !important;right:auto !important}
+  }
+
+  /* ---------- PAGE 7: LETTER ---------- */
+  .letter{
+    background:#FFFEF8 repeating-linear-gradient(transparent 0 35px, #F4D7E3 35px 36px);
+    border:3px solid var(--ink);border-radius:6px;padding:30px 22px 34px;box-shadow:7px 7px 0 var(--rani);
+    font-family:var(--hand);font-size:25px;line-height:36px;
+  }
+  .letter p{margin:0 0 36px}
+  .letter .sign{text-align:right;margin:0}
+
+  /* ---------- PAGE 8: CLOSING ---------- */
+  .closing{text-align:center;padding-top:20px}
+  .closing .big{font-size:clamp(40px,12vw,68px);color:var(--rani);text-shadow:4px 4px 0 var(--marigold);margin:10px 0 18px}
+  .closing .body{text-align:left}
+  .closing .btn{margin-top:18px}
+
+  /* ---------- LIGHTBOX / CONFETTI ---------- */
+  #lb{position:fixed;inset:0;z-index:60;background:rgba(42,27,79,.88);display:none;align-items:center;justify-content:center;padding:20px}
+  #lb.on{display:flex}
+  #lb img{max-height:85vh;border:4px solid #fff;border-radius:8px}
+  #confetti{position:fixed;inset:0;pointer-events:none;z-index:70;width:100%;height:100%}
+
+  /* ---------- KEYFRAMES ---------- */
+  @keyframes wobble-in{0%{transform:scale(.6) rotate(-8deg);opacity:0}100%{transform:none;opacity:1}}
+  @keyframes bob{50%{transform:translateY(-6px) rotate(6deg)}}
+  @keyframes pop{0%{transform:scale(.85);opacity:0}100%{transform:none;opacity:1}}
+  @keyframes shake{20%,60%{transform:translateX(-10px) rotate(-2deg)}40%,80%{transform:translateX(10px) rotate(2deg)}}
+  @keyframes lock-out{to{transform:scale(1.4);opacity:0}}
+  @keyframes page-in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  @keyframes letter{to{opacity:1;transform:none}}
+  @keyframes stamp{to{opacity:1;transform:scale(1) rotate(var(--r,0deg))}}
+  @keyframes fade{to{opacity:1}}
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation-duration:.01ms !important;animation-delay:0s !important;transition:none !important}
+  }
+</style>
+</head>
+<body>
+
+<canvas id="confetti" aria-hidden="true"></canvas>
+
+<!-- ================= WELCOME / PASSWORD ================= -->
+<div id="lock">
+  <div class="dots"></div>
+  <form class="ticket" id="lockForm" autocomplete="off">
+    <div class="lock-emoji" aria-hidden="true">🔐</div>
+    <h1>Ruko zara!</h1>
+    <p class="sub">This place is VIP only. One very specific birthday girl. Prove it's you.</p>
+    <div class="pw-row">
+      <label for="pw" class="sub" style="margin:0">Enter the secret word</label>
+      <input id="pw" type="text" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="type it here…">
+      <button class="btn" type="submit">Let me in 🎉</button>
+    </div>
+    <div id="pw-msg" role="status" aria-live="polite"></div>
+    <button class="link-btn" type="button" id="hintBtn">Need a hint?</button>
+    <div id="hint">Your most recent nickname, given with lots and lots of love by Shreyu 💕</div>
+  </form>
+</div>
+
+<!-- ================= APP ================= -->
+<div id="app">
+
+  <!-- 1. HAPPY BIRTHDAY -->
+  <section class="page" data-title="Happy Birthday">
+    <div class="hb-hero" id="hbHero">
+      <div class="hb-cake" aria-hidden="true">🎂</div>
+      <h1 class="hb-title" aria-label="Happy Birthday!"><span id="hbLetters"></span></h1>
+      <p class="hb-my">my love, my…</p>
+      <div class="names" id="names">
+        <span class="name">bubu</span>
+        <span class="name">ordhesh</span>
+        <span class="name">ordho</span>
+        <span class="name">king 👑</span>
+        <span class="name">bihari laal</span>
+        <span class="name">heart ❤️</span>
+        <span class="name last">my adhya!!</span>
+      </div>
+      <p class="hb-scroll">scroll down, birthday girl ↓</p>
+    </div>
+
+    <div class="story">
+      <h2>The story of a legend</h2>
+      <!-- TODO: Replace with your story (birth till now) -->
+      <p class="placeholder-text">Your story goes here — from the day she arrived in this world to the woman she is today. Replace this paragraph in index.html.</p>
+      <p class="placeholder-text">Add a second paragraph if you like. Keep them short so they read well on a phone.</p>
+
+      <div class="kid-pics">
+        <figure class="ph tilt-l" data-src="images/childhood-1.jpg"><figcaption>tiny Ordho</figcaption></figure>
+        <figure class="ph" data-src="images/childhood-2.jpg"><figcaption>already sassy</figcaption></figure>
+        <figure class="ph tilt-r" data-src="images/childhood-3.jpg"><figcaption>future king</figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. LIFE JOURNEY -->
+  <section class="page" data-title="Her Life Journey">
+    <h1 class="page-title">The Rebel Chronicles</h1>
+    <p class="page-lede">A true story. Mostly. Some parts exaggerated, but only slightly — she really is this impressive.</p>
+
+    <div class="road">
+      <div class="stop">
+        <div class="pin" aria-hidden="true">👶</div>
+        <div class="when">Kolkata, the beginning</div>
+        <h3>A star is born in the City of Joy</h3>
+        <p>Born and brought up in Kolkata, in a proper Marwari CA family. How CA? Dinner table conversations were about balance sheets, bedtime stories were about tax audits, and legend says she was handed a calculator before a rattle.</p>
+        <figure class="ph" data-src="images/journey-kolkata.jpg" style="--ar:4/3"><figcaption>Kolkata's finest export</figcaption></figure>
+      </div>
+
+      <div class="stop">
+        <div class="pin" aria-hidden="true">📊</div>
+        <div class="when">The family plan</div>
+        <h3>"Beta, CA toh karogi na?"</h3>
+        <p>Every uncle, every aunty, every cousin — CA. The path was laid out, the stationery was ready. The whole family was sure the next CA had arrived. She had other plans.</p>
+      </div>
+
+      <div class="stop">
+        <div class="pin" aria-hidden="true">🏊‍♀️</div>
+        <div class="when">The rebel arc begins</div>
+        <h3>Signed up for swimming. Could not swim.</h3>
+        <p>Confidence level: Olympic. Swimming skills: roughly those of a brick. She jumped in anyway. This one moment explains her entire personality — if she decides to do something, she figures out the "how" later.</p>
+        <figure class="ph" data-src="images/journey-swimming.jpg" style="--ar:4/3"><figcaption>fearless (and slightly wet)</figcaption></figure>
+      </div>
+
+      <div class="stop">
+        <div class="pin" aria-hidden="true">⚙️</div>
+        <div class="when">Plot twist</div>
+        <h3>Engineering. In a family of CAs.</h3>
+        <p>While the whole family balanced accounts, she chose to balance equations. Somewhere in Kolkata, a CA uncle dropped his chai. She walked out of it an engineer, head held high.</p>
+        <figure class="ph" data-src="images/journey-engineering.jpg" style="--ar:4/3"><figcaption>engineer saab</figcaption></figure>
+      </div>
+
+      <div class="stop">
+        <div class="pin" aria-hidden="true">🏭</div>
+        <div class="when">First job</div>
+        <h3>Survived the madness at Honeywell</h3>
+        <p>Landed at Honeywell — a genuinely crazy place to start a career. Long days, wild deadlines, and she handled it all like it was a warm-up round.</p>
+        <figure class="ph" data-src="images/journey-honeywell.jpg" style="--ar:4/3"><figcaption>corporate era: unlocked</figcaption></figure>
+      </div>
+
+      <div class="stop">
+        <div class="pin" aria-hidden="true">🐯</div>
+        <div class="when">The big one</div>
+        <h3>Cracked CAT like a pistachio</h3>
+        <p>Working full-time? Sure. Preparing for one of India's toughest exams on the side? Also sure. She cracked CAT and walked into one of the best B-schools in the country: <em>[college name]</em>.</p>
+        <figure class="ph" data-src="images/journey-mba.jpg" style="--ar:4/3"><figcaption>MBA madam has entered</figcaption></figure>
+      </div>
+
+      <div class="stop">
+        <div class="pin" aria-hidden="true">💪</div>
+        <div class="when">The toughest chapter</div>
+        <h3>Sick, but unstoppable</h3>
+        <p>Right when it mattered most, her health gave up on her. Most people would have hit pause. She didn't. She fought through it and aced her placements anyway. This is the chapter I'm proudest of.</p>
+      </div>
+
+      <div class="stop">
+        <div class="pin" aria-hidden="true">💼</div>
+        <div class="when">Accenture</div>
+        <h3>Works so hard, even her laptop asks for leave</h3>
+        <p>Joined Accenture and went full beast mode. Calls, decks, deadlines, more calls. People noticed — and that hard work opened the next door.</p>
+        <figure class="ph" data-src="images/journey-accenture.jpg" style="--ar:4/3"><figcaption>boss behaviour</figcaption></figure>
+      </div>
+
+      <div class="stop">
+        <div class="pin" aria-hidden="true">🇺🇸</div>
+        <div class="when">Right now</div>
+        <h3>Taking over America</h3>
+        <p>The girl from Kolkata who was supposed to become a CA is now working in the US. America doesn't know it yet, but it has a new king.</p>
+        <figure class="ph" data-src="images/journey-us.jpg" style="--ar:4/3"><figcaption>the US chapter</figcaption></figure>
+      </div>
+    </div>
+
+    <h2 class="section-h">Trophy cabinet 🏆</h2>
+    <!-- TODO: Replace with her real achievements -->
+    <div class="ach-grid">
+      <div class="ach">
+        <figure class="ph" data-src="images/achievement-1.jpg" style="--ar:1/1"></figure>
+        <h4>Achievement title</h4>
+        <p>One or two lines about it.</p>
+      </div>
+      <div class="ach">
+        <figure class="ph" data-src="images/achievement-2.jpg" style="--ar:1/1"></figure>
+        <h4>Achievement title</h4>
+        <p>One or two lines about it.</p>
+      </div>
+      <div class="ach">
+        <figure class="ph" data-src="images/achievement-3.jpg" style="--ar:1/1"></figure>
+        <h4>Achievement title</h4>
+        <p>One or two lines about it.</p>
+      </div>
+      <div class="ach">
+        <figure class="ph" data-src="images/achievement-4.jpg" style="--ar:1/1"></figure>
+        <h4>Achievement title</h4>
+        <p>One or two lines about it.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. WHAT'S SPECIAL -->
+  <section class="page" data-title="What Makes Her Special">
+    <h1 class="page-title">Why I love her soooo much</h1>
+    <p class="page-lede">Way more than a normal person would. Here's the evidence.</p>
+
+    <h2 class="section-h" style="margin-top:0">The qualities</h2>
+    <div class="traits">
+      <div class="trait"><div class="e">🗣️</div><div><b>Extremely interesting to talk to</b><span>Hours feel like minutes. I never run out of things to say to her.</span></div></div>
+      <div class="trait"><div class="e">🔥</div><div><b>Ridiculously hardworking</b><span>If effort were a sport, she'd be a world champion.</span></div></div>
+      <div class="trait"><div class="e">🤗</div><div><b>So caring</b><span>She notices the small things and quietly takes care of everyone.</span></div></div>
+      <div class="trait"><div class="e">🏡</div><div><b>Loves her family deeply</b><span>Her family is her whole world, and it shows in everything she does.</span></div></div>
+      <div class="trait"><div class="e">🧠</div><div><b>Mature and logical</b><span>Ask her anything and you'll get a calm, sensible answer.</span></div></div>
+      <div class="trait"><div class="e">🕊️</div><div><b>Forgives quickly</b><span>Holds hugs, not grudges.</span></div></div>
+      <div class="trait"><div class="e">💞</div><div><b>Extremely understanding</b><span>She gets it, even when I can't explain it properly.</span></div></div>
+    </div>
+
+    <h2 class="section-h">The quirks (lovingly documented)</h2>
+    <div class="quirks">
+      <div class="quirk"><span class="e">😴</span><b>Kumbhkaran mode</b>After a certain point she's gone. Earthquakes, alarms, me — nothing works.</div>
+      <div class="quirk"><span class="e">🤡</span><b>Lame humor</b>Laughs at her own jokes before the punchline. I laugh too. Love is blind.</div>
+      <div class="quirk"><span class="e">👵</span><b>Aunty vibes</b>Some days she's 27. Some days she's a society-WhatsApp-group aunty.</div>
+      <div class="quirk"><span class="e">😛</span><b>The tongue</b>Randomly sticks her tongue out. No warning. No explanation.</div>
+      <div class="quirk"><span class="e">🚽</span><b>"Only once a day"</b>Official statement: once a day. Ground reality: frequent flyer.</div>
+      <div class="quirk"><span class="e">😤</span><b>0 to angry in 2 sec</b>Gets annoyed super fast. Luckily, see quality no. 6.</div>
+    </div>
+
+    <div class="serious">
+      <h2>Okay, on a serious note</h2>
+      <p>Jokes apart, I love you for who you are at heart. Your kindness, your strength, the way you care for the people you love, the way you keep going no matter what. You are the best person I know.</p>
+      <p style="margin:0">Every quirk above? I wouldn't change a single one.</p>
+    </div>
+
+    <div class="hot">
+      <p>And of course… can't forget that killer hotness and those beautiful looks 🔥</p>
+      <button class="btn alt" type="button" data-goto="next">See the proof</button>
+    </div>
+  </section>
+
+  <!-- 4. GALLERY -->
+  <section class="page" data-title="Ordho's Masterpieces">
+    <h1 class="page-title">Ordho's masterpieces</h1>
+    <p class="page-lede">Models everywhere, please take notes. Tap any photo to see it bigger.</p>
+    <!-- TODO: add/remove figures as needed -->
+    <div class="gallery">
+      <figure class="ph" data-src="images/gallery-1.jpg"><figcaption>unreal</figcaption></figure>
+      <figure class="ph" data-src="images/gallery-2.jpg" style="--ar:3/4"><figcaption>that smile</figcaption></figure>
+      <figure class="ph" data-src="images/gallery-3.jpg" style="--ar:1/1"><figcaption>cover girl</figcaption></figure>
+      <figure class="ph" data-src="images/gallery-4.jpg"><figcaption>too pretty</figcaption></figure>
+      <figure class="ph" data-src="images/gallery-5.jpg" style="--ar:3/4"><figcaption>slay</figcaption></figure>
+      <figure class="ph" data-src="images/gallery-6.jpg" style="--ar:1/1"><figcaption>my favourite</figcaption></figure>
+      <figure class="ph" data-src="images/gallery-7.jpg"><figcaption>illegal levels of cute</figcaption></figure>
+      <figure class="ph" data-src="images/gallery-8.jpg" style="--ar:3/4"><figcaption>queen</figcaption></figure>
+    </div>
+  </section>
+
+  <!-- 5. DATES -->
+  <section class="page" data-title="Our Dates">
+    <h1 class="page-title">Some dates I'll never forget</h1>
+    <p class="page-lede">A few of my favourite memories with you.</p>
+    <!-- TODO: fill in real date stories -->
+    <div class="dates">
+      <article class="date">
+        <figure class="ph" data-src="images/date-1.jpg" style="--ar:4/3"></figure>
+        <h3>Date title</h3>
+        <div class="meta">Place, month year</div>
+        <p>A short story about this date — what happened, what was funny, what you remember most.</p>
+      </article>
+      <article class="date">
+        <figure class="ph" data-src="images/date-2.jpg" style="--ar:4/3"></figure>
+        <h3>Date title</h3>
+        <div class="meta">Place, month year</div>
+        <p>A short story about this date.</p>
+      </article>
+      <article class="date">
+        <figure class="ph" data-src="images/date-3.jpg" style="--ar:4/3"></figure>
+        <h3>Date title</h3>
+        <div class="meta">Place, month year</div>
+        <p>A short story about this date.</p>
+      </article>
+      <article class="date">
+        <figure class="ph" data-src="images/date-4.jpg" style="--ar:4/3"></figure>
+        <h3>Date title</h3>
+        <div class="meta">Place, month year</div>
+        <p>A short story about this date.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- 6. US TIMELINE -->
+  <section class="page" data-title="Our Story">
+    <h1 class="page-title">Us, so far</h1>
+    <p class="page-lede">The little and big moments that got us here.</p>
+    <!-- TODO: fill in your real moments; add or remove .moment blocks -->
+    <div class="us">
+      <div class="moment">
+        <figure class="ph" data-src="images/us-1.jpg" style="--ar:1/1"></figure>
+        <div class="when">Month Year</div>
+        <h3>The first hello</h3>
+        <p>How it all started.</p>
+      </div>
+      <div class="moment">
+        <figure class="ph" data-src="images/us-2.jpg" style="--ar:1/1"></figure>
+        <div class="when">Month Year</div>
+        <h3>First date</h3>
+        <p>A line or two about it.</p>
+      </div>
+      <div class="moment">
+        <figure class="ph" data-src="images/us-3.jpg" style="--ar:1/1"></figure>
+        <div class="when">Month Year</div>
+        <h3>When I knew</h3>
+        <p>The moment you became my person.</p>
+      </div>
+      <div class="moment">
+        <figure class="ph" data-src="images/us-4.jpg" style="--ar:1/1"></figure>
+        <div class="when">Month Year</div>
+        <h3>First trip together</h3>
+        <p>A line or two about it.</p>
+      </div>
+      <div class="moment">
+        <figure class="ph" data-src="images/us-5.jpg" style="--ar:1/1"></figure>
+        <div class="when">Month Year</div>
+        <h3>Across the oceans</h3>
+        <p>Different time zones, same us.</p>
+      </div>
+      <div class="moment">
+        <figure class="ph" data-src="images/us-6.jpg" style="--ar:1/1"></figure>
+        <div class="when">Today</div>
+        <h3>Your birthday</h3>
+        <p>And many, many more to come.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. HEARTFELT NOTE -->
+  <section class="page" data-title="A Note For You">
+    <h1 class="page-title">For you, my adhya</h1>
+    <p class="page-lede">Read this one slowly.</p>
+    <!-- TODO: write your letter. Each <p> is one paragraph. -->
+    <div class="letter">
+      <p>My dearest Ordho,</p>
+      <p>Your heartfelt note goes here. Write as many paragraphs as you like — each one sits neatly on the lines of this page.</p>
+      <p>Replace these lines in index.html with your own words.</p>
+      <p class="sign">Forever yours,<br>Shreyu 💕</p>
+    </div>
+  </section>
+
+  <!-- 8. CLOSING -->
+  <section class="page" data-title="The End (not really)">
+    <div class="closing">
+      <div style="font-size:60px" aria-hidden="true">🎈🎂🎈</div>
+      <h1 class="big">Happy Birthday, Bihari Laal!</h1>
+      <!-- TODO: write your closing note -->
+      <div class="body">
+        <p class="placeholder-text">Your closing note goes here. Replace this paragraph in index.html.</p>
+      </div>
+      <button class="btn" type="button" id="replay">Celebrate again 🎉</button>
+    </div>
+  </section>
+
+  <nav id="nav" aria-label="Pages">
+    <div class="inner">
+      <button class="btn alt" type="button" id="prev" aria-label="Previous page">‹ Back</button>
+      <div class="where"><b id="navTitle"></b><span id="navCount"></span><div class="pips" id="pips"></div></div>
+      <button class="btn" type="button" id="next" aria-label="Next page">Next ›</button>
+    </div>
+  </nav>
+</div>
+
+<div id="lb" role="dialog" aria-label="Photo"><img alt=""></div>
+
+<script>
+(function(){
+  /* ---------- PASSWORD (case-insensitive "Biharilaal", stored as a hash) ---------- */
+  var HASH = 102540988;
+  function h(s){var x=5381;for(var i=0;i<s.length;i++){x=((x*33)^s.charCodeAt(i))>>>0}return x}
+  var lock=document.getElementById('lock'), form=document.getElementById('lockForm'),
+      pw=document.getElementById('pw'), msg=document.getElementById('pw-msg');
+  var nopes=[
+    "Nope. The Bihari bouncer says no. 🙅",
+    "Wrong! Even Kumbhkaran would've got this one.",
+    "Close? Not even a little. Try again.",
+    "Madam, there is a hint button for a reason 👀",
+    "Access denied. Are you sure you're the birthday girl?"
+  ], tries=0;
+
+  form.addEventListener('submit',function(e){
+    e.preventDefault();
+    if(h(pw.value.trim().toLowerCase())===HASH){ unlock(); }
+    else{
+      msg.textContent=nopes[tries++ % nopes.length];
+      form.classList.remove('shake'); void form.offsetWidth; form.classList.add('shake');
+      if(tries>=2) document.getElementById('hint').classList.add('show');
+    }
+  });
+  document.getElementById('hintBtn').addEventListener('click',function(){
+    document.getElementById('hint').classList.toggle('show');
+  });
+
+  function unlock(){
+    try{sessionStorage.setItem('bday-open','1')}catch(e){}
+    msg.textContent="Welcome, birthday girl! 💖";
+    lock.classList.add('leaving');
+    setTimeout(function(){ lock.style.display='none'; startApp(true); },650);
+  }
+
+  /* ---------- PAGES ---------- */
+  var pages=[].slice.call(document.querySelectorAll('.page')), cur=0,
+      prev=document.getElementById('prev'), next=document.getElementById('next'),
+      pips=document.getElementById('pips');
+  pages.forEach(function(){pips.appendChild(document.createElement('i'))});
+
+  function show(i){
+    cur=Math.max(0,Math.min(pages.length-1,i));
+    pages.forEach(function(p,k){p.classList.toggle('active',k===cur)});
+    document.getElementById('navTitle').textContent=pages[cur].dataset.title;
+    document.getElementById('navCount').textContent=(cur+1)+' of '+pages.length;
+    [].forEach.call(pips.children,function(p,k){p.classList.toggle('on',k===cur)});
+    prev.disabled=cur===0; next.disabled=cur===pages.length-1;
+    window.scrollTo(0,0);
+    if(cur===pages.length-1) burst(160);
+  }
+  prev.onclick=function(){show(cur-1)};
+  next.onclick=function(){show(cur+1)};
+  document.querySelectorAll('[data-goto="next"]').forEach(function(b){b.onclick=function(){show(cur+1)}});
+  document.getElementById('replay').onclick=function(){ show(0); playEntrance(); };
+
+  /* ---------- GRAND ENTRANCE ---------- */
+  var word="Happy Birthday!", box=document.getElementById('hbLetters'), n=0;
+  word.split(' ').forEach(function(w,wi){
+    var span=document.createElement('span'); span.style.whiteSpace='nowrap'; span.style.display='inline-block';
+    w.split('').forEach(function(c){var l=document.createElement('span');l.className='l';l.textContent=c;l.style.setProperty('--i',n++);l.setAttribute('aria-hidden','true');span.appendChild(l)});
+    box.appendChild(span); if(wi===0) box.appendChild(document.createTextNode(' '));
+  });
+  document.querySelectorAll('#names .name').forEach(function(el,i){
+    el.style.setProperty('--i',i); el.style.setProperty('--r',((i%2?1:-1)*(2+i%3))+'deg');
+  });
+  function playEntrance(){
+    var hero=document.getElementById('hbHero');
+    hero.classList.remove('go'); void hero.offsetWidth; hero.classList.add('go');
+    burst(220); setTimeout(function(){burst(140)},1500); setTimeout(function(){burst(260)},4300);
+  }
+  function startApp(fresh){
+    document.getElementById('app').classList.add('on');
+    loadPhotos(); show(0); playEntrance();
+  }
+
+  /* ---------- PHOTOS: show image, or a friendly placeholder if it's not added yet ---------- */
+  function loadPhotos(){
+    document.querySelectorAll('.ph[data-src]').forEach(function(fig){
+      if(fig.dataset.done) return; fig.dataset.done=1;
+      var src=fig.dataset.src, img=new Image(), cap=fig.querySelector('figcaption');
+      img.alt=cap?cap.textContent:'Photo'; img.loading='lazy';
+      img.onload=function(){};
+      img.onerror=function(){
+        var d=document.createElement('div'); d.className='empty';
+        d.innerHTML='<span>📸</span>Photo coming soon<code>'+src+'</code>';
+        img.replaceWith(d); fig.classList.add('no-img');
+      };
+      img.src=src; fig.insertBefore(img,cap||null);
+    });
+  }
+  var lb=document.getElementById('lb');
+  document.addEventListener('click',function(e){
+    var fig=e.target.closest('.ph'); if(!fig||fig.classList.contains('no-img')) return;
+    var img=fig.querySelector('img'); if(!img) return;
+    lb.querySelector('img').src=img.src; lb.classList.add('on');
+  });
+  lb.onclick=function(){lb.classList.remove('on')};
+
+  /* ---------- CONFETTI ---------- */
+  var cv=document.getElementById('confetti'), ctx=cv.getContext('2d'), bits=[], running=false;
+  var cols=['#E0157A','#FFB21E','#8FDCC2','#9CC9FF','#FF7BB5','#2A1B4F'];
+  var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function size(){cv.width=innerWidth*devicePixelRatio;cv.height=innerHeight*devicePixelRatio;ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0)}
+  addEventListener('resize',size); size();
+  function burst(count){
+    if(reduce) return;
+    for(var i=0;i<count;i++){
+      bits.push({x:innerWidth/2+(Math.random()-.5)*innerWidth*.5,y:innerHeight*.35,
+        vx:(Math.random()-.5)*12,vy:-Math.random()*13-4,s:Math.random()*7+5,
+        r:Math.random()*6,vr:(Math.random()-.5)*.3,c:cols[i%cols.length],
+        heart:Math.random()<.18,life:0});
+    }
+    if(!running){running=true;requestAnimationFrame(tick)}
+  }
+  function tick(){
+    ctx.clearRect(0,0,innerWidth,innerHeight);
+    bits=bits.filter(function(b){return b.y<innerHeight+40&&b.life<420});
+    bits.forEach(function(b){
+      b.life++; b.vy+=.28; b.vx*=.99; b.x+=b.vx; b.y+=b.vy; b.r+=b.vr;
+      ctx.save(); ctx.translate(b.x,b.y); ctx.rotate(b.r);
+      if(b.heart){ctx.font=(b.s*2.4)+'px serif';ctx.fillText('💗',-b.s,b.s)}
+      else{ctx.fillStyle=b.c;ctx.fillRect(-b.s/2,-b.s/4,b.s,b.s/2)}
+      ctx.restore();
+    });
+    if(bits.length) requestAnimationFrame(tick); else {running=false;ctx.clearRect(0,0,innerWidth,innerHeight)}
+  }
+
+  /* stay unlocked on refresh during the same visit */
+  try{ if(sessionStorage.getItem('bday-open')==='1'){ lock.style.display='none'; startApp(false); } }catch(e){}
+})();
+</script>
+</body>
+</html>
